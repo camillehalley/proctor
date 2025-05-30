@@ -14,6 +14,10 @@
     <!-- Fallback for when JavaScript is disabled -->
     <noscript>
       <%= form_with(url: submit_survey_path(@survey), method: :post, class: "space-y-6") do |form| %>
+        <div class="mb-6">
+          <%= label_tag "submission[role]", "Select your role", class: "block text-sm font-medium text-gray-700" %>
+          <%= select_tag "submission[role]", options_for_select(Submission.roles.keys.map { |r| [r.titleize, r] }), class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+        </div>
         <% if @questions.any? %>
           <% @questions.each do |question| %>
             <div class="bg-gray-50 p-4 rounded-md mb-4">
