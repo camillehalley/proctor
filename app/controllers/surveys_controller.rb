@@ -64,6 +64,11 @@ class SurveysController < ApplicationController
       redirect_to take_survey_path(@survey), alert: 'Please select a role and answer at least one question.'
     end
   end
+
+  def results
+    @surveys = Survey.includes(:questions).all
+    @submissions = Submission.includes(:responses).all
+  end
   
   private
   
@@ -74,4 +79,5 @@ class SurveysController < ApplicationController
   def survey_params
     params.require(:survey).permit(:title, :description)
   end
+
 end

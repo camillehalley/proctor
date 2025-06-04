@@ -3,6 +3,9 @@ Rails.application.routes.draw do
 
   # Set the root path to the surveys index
   root "surveys#index"
+
+  # Route for viewing survey results
+  get '/results', to: 'surveys#results', as: 'results'
   
   # RESTful routes for surveys
   resources :surveys do
