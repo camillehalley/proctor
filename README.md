@@ -1,4 +1,39 @@
+# Proctor: Additional Instructions and Explanations
+
+## Assumptions and scope boxing
+* Every survey will include a Select Role question even if there are no dynamic questions 
+* Survey questions are still created via seed data rather than UI
+
+## Instructions to run
+See existing instructions below, setup and run instructions have not changed. For an example of a branched survey, you 
+can take the new Tools Feedback Survey. The existing surveys should behave as they did previously. 
+
+## Approach Overview
+
+Questions now include an array of string enum values representing the roles to which they apply. If no roles are defined for a question, we treat it as applicable to all roles.
+
+Each survey includes a role selection dropdown as the first element in the view by default. All questions for a given survey are passed into the component as props, and we dynamically filter them based on the selected role using each question’s associated roles. Required questions are filtered from this role-specific subset.
+
+I’ve also introduced the concept of grouping responses by submission. When a survey is submitted, the role is saved on the submission, and all responses are saved with the associated submission_id.
+
+## Approach Explanation
+### Lightweight roles
+This implementation assumes that the set of roles (like Engineer, Designer, and Product Manager) is relatively static and managed internally. Given that, we’ve used an enum for roles to keep the structure straightforward and lightweight. If we were building a public-facing survey tool where admins could define roles, we’d likely model roles as a separate table and associate them with questions through a join table. That would allow dynamic creation, editing, and access of roles through a UI.
+
+### Flexible branching
+Role-based branching is implemented declaratively by attaching an array of roles directly to each question. Questions with no associated roles are treated as applying to all respondents, which supports backward compatibility and simplifies authoring. This approach eliminates the need for complex logic or separate rule engines, as the branching behavior is encoded naturally alongside the question definition.
+
+On the frontend, all questions for a survey are loaded up front and filtered client-side based on the selected role. This makes the user experience faster and more responsive (since we don’t need to make additional API calls as the role changes). For the short-to-medium surveys we're targeting, this keeps things efficient. If we eventually build significantly longer or more complex surveys, we can revisit that strategy.
+
+### Response organization
+We introduced a submission model to act as the parent for a set of responses. This lets us store shared information (like the selected role) once per submission instead of duplicating it across responses. It also sets us up to support additional context in the future, such as associating submissions with users or survey versions.
+
+This approach keeps things flexible and straightforward for internal use while leaving room to grow if needed.
+
+----
 # Proctor: Basic Survey Application
+
+### Note: Existing README is unedited below this point
 
 This is a coding challenge created by DX. It houses a basic survey application that will serve as the basis for the challenge.
 

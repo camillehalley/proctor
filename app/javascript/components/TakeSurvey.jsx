@@ -104,7 +104,6 @@ const TakeSurvey = (props) => {
 
   // if no rows are specified, apply to all roles
   const filteredQuestions = questions.filter(q => q.roles.length === 0 || q.roles.includes(role));
-  console.log(role)
 
   const handleInputChange = (questionId, value) => {
     setResponses({
