@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { createRoot } from 'react-dom/client';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ResultsViewer = (props) => {
     const { surveys, submissions } = props;
@@ -7,10 +8,18 @@ const ResultsViewer = (props) => {
     const [selectedSurveyId, setSelectedSurveyId] = useState(surveys[0]?.id || '');
     const [selectedRole, setSelectedRole] = useState('all');
 
-    useEffect(() => {
-        console.log('Surveys:', surveys);
-        console.log('Submissions:', submissions);
-    }, [surveys, submissions]);
+    const selectedSurvey = surveys.find(s => s.id.toString() === selectedSurveyId);
+    const questions = selectedSurvey?.questions || [];
+    const matchingSubmissions = submissions.filter(sub =>
+        sub.survey_id.toString() === selectedSurveyId &&
+        (selectedRole === 'all' || sub.role === selectedRole)
+    );
+    const responses = matchingSubmissions.flatMap(sub =>
+        (sub.responses || []).map(r => ({
+            ...r,
+            submission: { role: sub.role },
+        }))
+    );
 
     return (
         <div className="mb-6 p-4 bg-white shadow rounded">
@@ -45,7 +54,54 @@ const ResultsViewer = (props) => {
                         <option value="product_manager">Product Manager</option>
                     </select>
                 </div>
+
             </div>
+            {questions.map(question => (
+                <div key={question.id} className="mb-6 p-4 bg-white shadow rounded">
+                    {renderQuestionResults(question, responses)}
+                </div>
+            ))}
+        </div>
+    );
+};
+
+const renderQuestionResults = (question, responses) => {
+    if (question.question_type === 'rating') {
+        // Count how many responses for each rating value
+        const ratingCounts = {};
+        responses.forEach(r => {
+            if (r.question_id === question.id) {
+                const rating = parseInt(r.value, 10);
+                if (!isNaN(rating)) {
+                    ratingCounts[rating] = (ratingCounts[rating] || 0) + 1;
+                }
+            }
+        });
+
+        // Create chart data sorted by rating (e.g., 1–5)
+        const chartData = Array.from({ length: 5 }, (_, i) => ({
+            rating: (i + 1).toString(),
+            count: ratingCounts[i + 1] || 0,
+        }));
+
+        return (
+            <div className="mb-4">
+                <p className="text-gray-800 font-semibold mb-2">{question.content}</p>
+                <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={chartData}>
+                        <XAxis dataKey="rating" />
+                        <YAxis allowDecimals={false} />
+                        <Tooltip />
+                        <Bar dataKey="count" fill="#6366f1" />
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mb-4">
+            <p className="text-gray-700">Unsupported question type: {question.question_type}</p>
         </div>
     );
 };
