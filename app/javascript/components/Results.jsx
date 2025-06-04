@@ -5,7 +5,11 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 const ResultsViewer = (props) => {
     const { surveys, submissions } = props;
 
-    const [selectedSurveyId, setSelectedSurveyId] = useState(surveys[0]?.id || '');
+    if (!surveys || surveys.length === 0) {
+        return <p>Loading surveys...</p>;
+    }
+
+    const [selectedSurveyId, setSelectedSurveyId] = useState(() => surveys[0]?.id.toString() || '');
     const [selectedRole, setSelectedRole] = useState('all');
 
     const selectedSurvey = surveys.find(s => s.id.toString() === selectedSurveyId);
@@ -23,6 +27,7 @@ const ResultsViewer = (props) => {
 
     return (
         <div className="mb-6 p-4 bg-white shadow rounded">
+            <div className="mb-6 p-4 bg-white shadow rounded">
             <div className="flex space-x-4">
                 {/* Survey dropdown */}
                 <div className="flex-1">
@@ -56,8 +61,9 @@ const ResultsViewer = (props) => {
                 </div>
 
             </div>
+            </div>
             {questions.map(question => (
-                <div key={question.id} className="mb-6 p-4 bg-white shadow rounded">
+                <div key={question.id}>
                     {renderQuestionResults(question, responses)}
                 </div>
             ))}
@@ -66,30 +72,28 @@ const ResultsViewer = (props) => {
 };
 
 const renderQuestionResults = (question, responses) => {
+    const questionResponses = responses.filter(r => r.question_id === question.id);
+
     if (question.question_type === 'rating') {
-        // Count how many responses for each rating value
         const ratingCounts = {};
-        responses.forEach(r => {
-            if (r.question_id === question.id) {
-                const rating = parseInt(r.value, 10);
-                if (!isNaN(rating)) {
-                    ratingCounts[rating] = (ratingCounts[rating] || 0) + 1;
-                }
+        questionResponses.forEach(r => {
+            const rating = parseInt(r.value, 10);
+            if (!isNaN(rating)) {
+                ratingCounts[rating] = (ratingCounts[rating] || 0) + 1;
             }
         });
 
-        // Create chart data sorted by rating (e.g., 1–5)
         const chartData = Array.from({ length: 5 }, (_, i) => ({
-            rating: (i + 1).toString(),
+            label: (i + 1).toString(),
             count: ratingCounts[i + 1] || 0,
         }));
 
         return (
-            <div className="mb-4">
+            <div className="mb-6 p-4 bg-white shadow rounded">
                 <p className="text-gray-800 font-semibold mb-2">{question.content}</p>
                 <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={chartData}>
-                        <XAxis dataKey="rating" />
+                        <XAxis dataKey="label" />
                         <YAxis allowDecimals={false} />
                         <Tooltip />
                         <Bar dataKey="count" fill="#6366f1" />
@@ -99,12 +103,41 @@ const renderQuestionResults = (question, responses) => {
         );
     }
 
-    return (
-        <div className="mb-4">
-            <p className="text-gray-700">Unsupported question type: {question.question_type}</p>
-        </div>
-    );
+    if (question.question_type === 'multiple_choice') {
+        const choiceCounts = {};
+        const allChoices = question.options || []
+        console.log(allChoices)
+
+        questionResponses.forEach(r => {
+            const answer = r.value;
+            choiceCounts[answer] = (choiceCounts[answer] || 0) + 1;
+        });
+
+        console.log(questionResponses)
+
+        // Ensure all choices are represented in chartData
+        const chartData = allChoices.map(choice => ({
+            label: choice,
+            count: choiceCounts[choice] || 0,
+        }));
+
+        return (
+            <div className="mb-6 p-4 bg-white shadow rounded">
+                <p className="text-gray-800 font-semibold mb-2">{question.content}</p>
+                <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={chartData}>
+                        <XAxis dataKey="label" />
+                        <YAxis allowDecimals={false} />
+                        <Tooltip />
+                        <Bar dataKey="count" fill="#10b981" />
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+        );
+    }
+
 };
+
 
 const initializeResultsViewer = () => {
     const container = document.getElementById('results-container');
