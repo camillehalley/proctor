@@ -5,8 +5,9 @@
 * Survey questions are still created via seed data rather than UI
 
 ## Instructions to run
-See existing instructions below, setup and run instructions have not changed. For an example of a branched survey, you 
-can take the new Tools Feedback Survey. The existing surveys should behave as they did previously. 
+See existing instructions below for initial setup.
+Run npm install recharts to ensure recharts is installed. 
+For an example of a branched survey, you can take the new Tools Feedback Survey. The existing surveys should behave as they did previously. 
 
 ## Approach Overview
 
@@ -18,7 +19,7 @@ I’ve also introduced the concept of grouping responses by submission. When a s
 
 ## Approach Explanation
 ### Lightweight roles
-This implementation assumes that the set of roles (like Engineer, Designer, and Product Manager) is relatively static and managed internally. Given that, we’ve used an enum for roles to keep the structure straightforward and lightweight. If we were building a public-facing survey tool where admins could define roles, we’d likely model roles as a separate table and associate them with questions through a join table. That would allow dynamic creation, editing, and access of roles through a UI.
+This implementation assumes that the set of roles (like Engineer, Designer, and Product Manager) is relatively static and managed internally. Given that, I’ve used an enum for roles to keep the structure straightforward and lightweight. If we were building a public-facing survey tool where admins could define roles, we’d likely model roles as a separate table and associate them with questions through a join table. That would allow dynamic creation, editing, and access of roles through a UI.
 
 ### Flexible branching
 Role-based branching is implemented declaratively by attaching an array of roles directly to each question. Questions with no associated roles are treated as applying to all respondents, which supports backward compatibility and simplifies authoring. This approach eliminates the need for complex logic or separate rule engines, as the branching behavior is encoded naturally alongside the question definition.
@@ -26,9 +27,66 @@ Role-based branching is implemented declaratively by attaching an array of roles
 On the frontend, all questions for a survey are loaded up front and filtered client-side based on the selected role. This makes the user experience faster and more responsive (since we don’t need to make additional API calls as the role changes). For the short-to-medium surveys we're targeting, this keeps things efficient. If we eventually build significantly longer or more complex surveys, we can revisit that strategy.
 
 ### Response organization
-We introduced a submission model to act as the parent for a set of responses. This lets us store shared information (like the selected role) once per submission instead of duplicating it across responses. It also sets us up to support additional context in the future, such as associating submissions with users or survey versions.
+I've introduced a submission model to act as the parent for a set of responses. This lets us store shared information (like the selected role) once per submission instead of duplicating it across responses. It also sets us up to support additional context in the future, such as associating submissions with users or survey versions.
 
 This approach keeps things flexible and straightforward for internal use while leaving room to grow if needed.
+
+## Results
+The Results tab displays visual summaries of survey data. Currently, the UI supports rating and multiple choice question types, which are rendered as bar charts for quick interpretation. Users can filter results by survey and role using dropdowns.
+
+This implementation is built for flexibility, additional filters like created_at or time-based comparisons (e.g., line graphs for change over time) could be easily integrated. The existing data structure supports these future enhancements without requiring major changes to the underlying models or queries.
+
+For some information, we might want to query the database directly. For example, if we wanted to quickly pull the lowest ranked question to address it:
+   ```
+   SELECT
+   q.id AS question_id,
+   q.content AS question_text,
+   ROUND(AVG(r.value::numeric), 2) AS average_rating
+   FROM
+   questions q
+   JOIN
+   responses r ON r.question_id = q.id
+   WHERE
+   q.question_type = 'rating'
+   AND r.survey_id = 1  -- Replace with your actual survey ID
+   GROUP BY
+   q.id, q.content
+   ORDER BY
+   average_rating ASC
+   LIMIT 1;
+   ```
+or we may want to check how the average response for a ranked choice question has changed between two time periods:
+   ```
+   WITH ranked_responses AS (
+     SELECT
+       r.question_id,
+       r.value::int AS rating,
+       s.created_at::date AS submission_date
+     FROM responses r
+     JOIN submissions s ON r.submission_id = s.id
+     WHERE r.question_id = 42  -- <-- replace with the actual question_id
+   ),
+   period_averages AS (
+     SELECT
+       CASE
+         WHEN submission_date < '2024-12-31' THEN 'before'
+         ELSE 'after'
+       END AS period,
+       ROUND(AVG(rating)::numeric, 2) AS avg_rating
+     FROM ranked_responses
+     WHERE submission_date BETWEEN '2024-10-01' AND '2025-06-01'
+     GROUP BY 1
+   )
+   SELECT
+     MAX(CASE WHEN period = 'before' THEN avg_rating END) AS avg_before,
+     MAX(CASE WHEN period = 'after' THEN avg_rating END) AS avg_after,
+     ROUND(
+       MAX(CASE WHEN period = 'after' THEN avg_rating END)
+       - MAX(CASE WHEN period = 'before' THEN avg_rating END),
+       2
+     ) AS avg_change
+   FROM period_averages;
+   ```
 
 ----
 # Proctor: Basic Survey Application
