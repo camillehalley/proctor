@@ -367,22 +367,25 @@ const TakeSurvey = (props) => {
       
       <form onSubmit={handleSubmit}>
         <div className="mb-6 p-4 bg-white shadow rounded">
-          <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-            Select your role <span className="text-red-500">*</span>
-          </label>
-          <select
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              required
-          >
-            <option value="" disabled>Select a role</option>
-            <option value="engineer">Engineer</option>
-            <option value="designer">Designer</option>
-            <option value="product_manager">Product Manager</option>
-          </select>
+          <div className="mb-4">
+            <label htmlFor="role" className="block text-gray-700 text-sm font-bold mb-2">
+              Select your role <span className="text-red-500">*</span>
+            </label>
+            <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="shadow border rounded w-full py-1 px-3 text-sm text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-white"
+                required
+            >
+              <option value="" disabled>Select a role</option>
+              <option value="engineer">Engineer</option>
+              <option value="designer">Designer</option>
+              <option value="product_manager">Product Manager</option>
+            </select>
           </div>
+
+        </div>
         {filteredQuestions.map(question => (
           <div key={question.id} className="mb-6 p-4 bg-white shadow rounded">
             {renderQuestion(question)}
