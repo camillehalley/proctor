@@ -13,7 +13,7 @@ class ResponsesController < ApplicationController
         survey: @survey,
         submission: submission,
         question_id: response_data[:question_id],
-        value: response_data[:content] # assumes you're sending `content`
+        value: response_data[:content]
       )
     end
 
