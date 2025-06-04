@@ -9,6 +9,7 @@
 # Clear existing data
 puts "Clearing existing data..."
 Response.destroy_all
+Submission.destroy_all
 Question.destroy_all
 Survey.destroy_all
 
@@ -238,6 +239,63 @@ customer_questions = [
 
 customer_questions.each do |question_attrs|
   customer_survey.questions.create!(question_attrs)
+end
+
+# Create tools feedback survey
+puts "Creating tools feedback survey..."
+tools_survey = Survey.create!(
+  title: "Tools Feedback Survey",
+  description: "Help us evaluate the usefulness of various tools across different roles."
+)
+
+puts "Creating questions for tools survey..."
+tools_questions = [
+  {
+    content: "How satisfied are you with using RubyMine as your IDE?",
+    question_type: "rating",
+    position: 1,
+    required: true,
+    roles: ["engineer"]
+  },
+  {
+    content: "How satisfied are you with Postman for API testing?",
+    question_type: "rating",
+    position: 2,
+    required: true,
+    roles: ["engineer"]
+  },
+  {
+    content: "How satisfied are you with Figma for UI/UX design?",
+    question_type: "rating",
+    position: 3,
+    required: true,
+    roles: ["designer", "product_manager"]
+  },
+  {
+    content: "How satisfied are you with Adobe Creative Suite?",
+    question_type: "rating",
+    position: 4,
+    required: true,
+    roles: ["designer"]
+  },
+  {
+    content: "How satisfied are you with Notion for documentation and planning?",
+    question_type: "rating",
+    position: 5,
+    required: true,
+    roles: ["product_manager"]
+  },
+  {
+    content: "How satisfied are you with Linear for issue tracking?",
+    question_type: "rating",
+    position: 6,
+    required: true,
+    roles: ["engineer", "designer", "product_manager"]
+  }
+]
+
+tools_questions.each do |question_attrs|
+  tools_survey.questions.create!(question_attrs)
 end
 
 puts "Seed data created successfully!"

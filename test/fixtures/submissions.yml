@@ -2,8 +2,8 @@
 
 one:
   survey: one
-  role: 1
+  role: MyString
 
 two:
   survey: two
-  role: 1
+  role: MyString

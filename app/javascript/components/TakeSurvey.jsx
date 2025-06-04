@@ -100,7 +100,11 @@ const TakeSurvey = (props) => {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState([]);
   const [submitted, setSubmitted] = useState(false);
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState('engineer');
+
+  // if no rows are specified, apply to all roles
+  const filteredQuestions = questions.filter(q => q.roles.length === 0 || q.roles.includes(role));
+  console.log(role)
 
   const handleInputChange = (questionId, value) => {
     setResponses({
@@ -115,9 +119,9 @@ const TakeSurvey = (props) => {
     setErrors([]);
 
     // Validate responses
-    const requiredQuestions = questions.filter(q => q.required);
+    const requiredQuestions = filteredQuestions.filter(q => q.required);
     const missingResponses = requiredQuestions.filter(q => !responses[q.id]);
-    
+
     if (missingResponses.length > 0) {
       setErrors(['Please answer all required questions.']);
       setSubmitting(false);
@@ -142,6 +146,7 @@ const TakeSurvey = (props) => {
         body: JSON.stringify({
           response: {
             survey_id: survey.id,
+            submission: {role: role},
             question_responses_attributes: formattedResponses
           }
         })
@@ -341,9 +346,6 @@ const TakeSurvey = (props) => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">{survey.title}</h1>
-      <p className="mb-6">{survey.description}</p>
-      
       {errors.length > 0 && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
           <div className="flex">
@@ -364,9 +366,9 @@ const TakeSurvey = (props) => {
       )}
       
       <form onSubmit={handleSubmit}>
-        <div className="mb-6">
+        <div className="mb-6 p-4 bg-white shadow rounded">
           <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-            Select your role
+            Select your role <span className="text-red-500">*</span>
           </label>
           <select
               id="role"
@@ -380,8 +382,8 @@ const TakeSurvey = (props) => {
             <option value="designer">Designer</option>
             <option value="product_manager">Product Manager</option>
           </select>
-        </div>
-        {questions.map(question => (
+          </div>
+        {filteredQuestions.map(question => (
           <div key={question.id} className="mb-6 p-4 bg-white shadow rounded">
             {renderQuestion(question)}
           </div>
