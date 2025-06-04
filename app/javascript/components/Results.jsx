@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import { createRoot } from 'react-dom/client';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import {createRoot} from 'react-dom/client';
+import {BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer} from 'recharts';
 
 const ResultsViewer = (props) => {
-    const { surveys, submissions } = props;
+    const {surveys, submissions} = props;
 
     if (!surveys || surveys.length === 0) {
         return <p>Loading surveys...</p>;
@@ -21,46 +21,46 @@ const ResultsViewer = (props) => {
     const responses = matchingSubmissions.flatMap(sub =>
         (sub.responses || []).map(r => ({
             ...r,
-            submission: { role: sub.role },
+            submission: {role: sub.role},
         }))
     );
 
     return (
         <div className="mb-6 p-4 bg-white shadow rounded">
             <div className="mb-6 p-4 bg-white shadow rounded">
-            <div className="flex space-x-4">
-                {/* Survey dropdown */}
-                <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Select Survey</label>
-                    <select
-                        value={selectedSurveyId}
-                        onChange={(e) => setSelectedSurveyId(e.target.value)}
-                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    >
-                        {surveys.map((survey) => (
-                            <option key={survey.id} value={survey.id}>
-                                {survey.title}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <div className="flex space-x-4">
+                    {/* Survey dropdown */}
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Select Survey</label>
+                        <select
+                            value={selectedSurveyId}
+                            onChange={(e) => setSelectedSurveyId(e.target.value)}
+                            className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                            {surveys.map((survey) => (
+                                <option key={survey.id} value={survey.id}>
+                                    {survey.title}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                {/* Role dropdown */}
-                <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Role</label>
-                    <select
-                        value={selectedRole}
-                        onChange={(e) => setSelectedRole(e.target.value)}
-                        className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    >
-                        <option value="all">All Roles</option>
-                        <option value="engineer">Engineer</option>
-                        <option value="designer">Designer</option>
-                        <option value="product_manager">Product Manager</option>
-                    </select>
-                </div>
+                    {/* Role dropdown */}
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Role</label>
+                        <select
+                            value={selectedRole}
+                            onChange={(e) => setSelectedRole(e.target.value)}
+                            className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                            <option value="all">All Roles</option>
+                            <option value="engineer">Engineer</option>
+                            <option value="designer">Designer</option>
+                            <option value="product_manager">Product Manager</option>
+                        </select>
+                    </div>
 
-            </div>
+                </div>
             </div>
             {questions.map(question => (
                 <div key={question.id}>
@@ -83,7 +83,7 @@ const renderQuestionResults = (question, responses) => {
             }
         });
 
-        const chartData = Array.from({ length: 5 }, (_, i) => ({
+        const chartData = Array.from({length: 5}, (_, i) => ({
             label: (i + 1).toString(),
             count: ratingCounts[i + 1] || 0,
         }));
@@ -93,10 +93,10 @@ const renderQuestionResults = (question, responses) => {
                 <p className="text-gray-800 font-semibold mb-2">{question.content}</p>
                 <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={chartData}>
-                        <XAxis dataKey="label" />
-                        <YAxis allowDecimals={false} />
-                        <Tooltip />
-                        <Bar dataKey="count" fill="#6366f1" />
+                        <XAxis dataKey="label"/>
+                        <YAxis allowDecimals={false}/>
+                        <Tooltip/>
+                        <Bar dataKey="count" fill="#6366f1"/>
                     </BarChart>
                 </ResponsiveContainer>
             </div>
@@ -106,14 +106,11 @@ const renderQuestionResults = (question, responses) => {
     if (question.question_type === 'multiple_choice') {
         const choiceCounts = {};
         const allChoices = question.options || []
-        console.log(allChoices)
 
         questionResponses.forEach(r => {
             const answer = r.value;
             choiceCounts[answer] = (choiceCounts[answer] || 0) + 1;
         });
-
-        console.log(questionResponses)
 
         // Ensure all choices are represented in chartData
         const chartData = allChoices.map(choice => ({
@@ -126,10 +123,10 @@ const renderQuestionResults = (question, responses) => {
                 <p className="text-gray-800 font-semibold mb-2">{question.content}</p>
                 <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={chartData}>
-                        <XAxis dataKey="label" />
-                        <YAxis allowDecimals={false} />
-                        <Tooltip />
-                        <Bar dataKey="count" fill="#10b981" />
+                        <XAxis dataKey="label"/>
+                        <YAxis allowDecimals={false}/>
+                        <Tooltip/>
+                        <Bar dataKey="count" fill="#10b981"/>
                     </BarChart>
                 </ResponsiveContainer>
             </div>
@@ -149,7 +146,7 @@ const initializeResultsViewer = () => {
         container.setAttribute('data-react-initialized', 'true');
 
         const root = createRoot(container);
-        root.render(<ResultsViewer surveys={surveys} submissions={submissions} />);
+        root.render(<ResultsViewer surveys={surveys} submissions={submissions}/>);
     }
 };
 
