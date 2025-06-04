@@ -251,44 +251,50 @@ tools_survey = Survey.create!(
 puts "Creating questions for tools survey..."
 tools_questions = [
   {
-    content: "How satisfied are you with using RubyMine as your IDE?",
-    question_type: "rating",
+    content: "What tool do you find most valuable?",
+    question_type: "long_text",
     position: 1,
-    required: true,
-    roles: ["engineer"]
+    required: true
   },
   {
-    content: "How satisfied are you with Postman for API testing?",
+    content: "How satisfied are you with using RubyMine as your IDE?",
     question_type: "rating",
     position: 2,
     required: true,
     roles: ["engineer"]
   },
   {
-    content: "How satisfied are you with Figma for UI/UX design?",
+    content: "How satisfied are you with Postman for API testing?",
     question_type: "rating",
     position: 3,
+    required: true,
+    roles: ["engineer"]
+  },
+  {
+    content: "How satisfied are you with Figma for UI/UX design?",
+    question_type: "rating",
+    position: 4,
     required: true,
     roles: ["designer", "product_manager"]
   },
   {
     content: "How satisfied are you with Adobe Creative Suite?",
     question_type: "rating",
-    position: 4,
+    position: 5,
     required: true,
     roles: ["designer"]
   },
   {
     content: "How satisfied are you with Notion for documentation and planning?",
     question_type: "rating",
-    position: 5,
+    position: 6,
     required: true,
     roles: ["product_manager"]
   },
   {
     content: "How satisfied are you with Linear for issue tracking?",
     question_type: "rating",
-    position: 6,
+    position: 7,
     required: true,
     roles: ["engineer", "designer", "product_manager"]
   }
