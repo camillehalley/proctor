@@ -47,9 +47,13 @@ class QuestionsController < ApplicationController
   def set_question
     @question = @survey.questions.find(params[:id])
   end
-  
+
   def question_params
-    params.require(:question).permit(:content, :question_type, :position, :required, options: [])
+    raw_roles = params[:question][:roles]&.reject(&:blank?)
+
+    params.require(:question).permit(:content, :question_type, :position, :required, options: []).tap do |qp|
+      qp[:roles] = raw_roles.presence  # nil if none selected
+    end
   end
   
   def process_options
