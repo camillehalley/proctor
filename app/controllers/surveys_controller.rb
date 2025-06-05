@@ -24,12 +24,18 @@ class SurveysController < ApplicationController
   
   def edit
   end
-  
+
   def update
     if @survey.update(survey_params)
-      redirect_to @survey, notice: 'Survey was successfully updated.'
+      respond_to do |format|
+        format.html { redirect_to @survey, notice: 'Survey was successfully updated.' }
+        format.json { render json: { survey: @survey }, status: :ok }
+      end
     else
-      render :edit, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: { errors: @survey.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
   
