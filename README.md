@@ -7,7 +7,7 @@
 ## Instructions to run
 See existing instructions below for initial setup.
 Run `npm install recharts` to ensure Recharts is installed.
-For an example of a branched survey, you can take the new Tools Feedback Survey. The existing surveys should behave as they did previously.
+For an example of a branched survey, you can take the new Tools Feedback Survey. The existing surveys should behave as they did previously. You can also add and update question roles in the question editor under View. 
 
 ## Approach Overview
 Questions now include an array of string enum values representing the roles to which they apply. If no roles are defined for a question, we treat it as applicable to all roles.
