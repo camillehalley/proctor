@@ -12,13 +12,14 @@ const SurveyForm = (props) => {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     const url = props.survey?.id ? `/surveys/${props.survey.id}` : '/surveys';
     const method = props.survey?.id ? 'PATCH' : 'POST';
-    
+
     try {
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "X-CSRF-Token": csrfToken
         },
         body: JSON.stringify({
           survey: {
@@ -27,12 +28,13 @@ const SurveyForm = (props) => {
           }
         })
       });
-      
+
       if (response.ok) {
-        window.location.href = props.survey?.id ? `/surveys/${props.survey.id}` : '/surveys';
+        const data = await response.json();
+        window.location.href = `/surveys/${data.survey.id}`;
       } else {
         const data = await response.json();
-        setErrors(data.errors || ['An error occurred']);
+        setErrors(data.errors || ["An error occurred"]);
       }
     } catch (error) {
       setErrors(['An error occurred']);

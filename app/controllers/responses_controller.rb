@@ -1,22 +1,31 @@
 class ResponsesController < ApplicationController
   def create
+    puts "PARAMS: #{params.inspect}"
+
     @survey = Survey.find(params[:survey_id])
-    @response = Response.new(response_params)
+
+    submission = @survey.submissions.create!(role: params.dig(:response, :submission, :role))
+
+    responses = params.dig(:response, :question_responses_attributes) || []
+
+    responses.each do |response_data|
+      Response.create!(
+        survey: @survey,
+        submission: submission,
+        question_id: response_data[:question_id],
+        value: response_data[:content]
+      )
+    end
 
     respond_to do |format|
-      if @response.save
-        format.html { redirect_to surveys_path, notice: 'Response was successfully recorded.' }
-        format.json { render json: { success: true }, status: :created }
-      else
-        format.html { redirect_to take_survey_path(@survey), alert: 'There was an error recording your response.' }
-        format.json { render json: { error: @response.errors.full_messages.join(', ') }, status: :unprocessable_entity }
-      end
+      format.html { redirect_to surveys_path, notice: 'Responses were successfully recorded.' }
+      format.json { render json: { success: true }, status: :created }
     end
-  end
-  
-  private
-  
-  def response_params
-    params.require(:response).permit(:survey_id, :question_id, :value)
+  rescue => e
+    Rails.logger.error("Response creation failed: #{e.message}")
+    respond_to do |format|
+      format.html { redirect_to take_survey_path(@survey), alert: 'There was an error recording your response.' }
+      format.json { render json: { error: e.message }, status: :unprocessable_entity }
+    end
   end
 end

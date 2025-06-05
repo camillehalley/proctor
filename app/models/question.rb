@@ -11,9 +11,10 @@ class Question < ApplicationRecord
   # Ensure position is maintained within a survey
   acts_as_list scope: :survey
   
-  # Serialize options as an array
+  # Serialize as an array
   serialize :options, Array
-  
+  serialize :roles, Array
+
   # Ensure options are present for question types that need them
   validate :validate_options_for_question_type
   

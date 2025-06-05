@@ -24,12 +24,18 @@ class SurveysController < ApplicationController
   
   def edit
   end
-  
+
   def update
     if @survey.update(survey_params)
-      redirect_to @survey, notice: 'Survey was successfully updated.'
+      respond_to do |format|
+        format.html { redirect_to @survey, notice: 'Survey was successfully updated.' }
+        format.json { render json: { survey: @survey }, status: :ok }
+      end
     else
-      render :edit, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: { errors: @survey.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
   
@@ -41,19 +47,33 @@ class SurveysController < ApplicationController
   def take
     @questions = @survey.questions.order(:position)
   end
-  
+
   def submit
-    if params[:responses].present?
+    if params[:responses].present? && params[:submission].present?
+      # 1. Create the submission with a role
+      submission = @survey.submissions.create!(
+        role: params[:submission][:role]
+      )
+
+      # 2. Loop through and create each response linked to that submission
       params[:responses].each do |response_params|
-        @survey.responses.create(
+        Response.create!(
+          survey: @survey,
+          submission: submission,
           question_id: response_params[:question_id],
-          value: response_params[:value],
+          value: response_params[:value]
         )
       end
+
       redirect_to surveys_path, notice: 'Thank you for completing the survey!'
     else
-      redirect_to take_survey_path(@survey), alert: 'Please answer at least one question.'
+      redirect_to take_survey_path(@survey), alert: 'Please select a role and answer at least one question.'
     end
+  end
+
+  def results
+    @surveys = Survey.includes(:questions).all
+    @submissions = Submission.includes(:responses).all
   end
   
   private
@@ -65,4 +85,5 @@ class SurveysController < ApplicationController
   def survey_params
     params.require(:survey).permit(:title, :description)
   end
+
 end

@@ -64,6 +64,27 @@
     </p>
   </div>
 
+  <div>
+    <%= form.label :roles, "Applicable Roles", class: "block text-sm font-medium text-gray-700 mb-2" %>
+
+    <div class="space-y-2">
+      <% [["Engineer", "engineer"], ["Designer", "designer"], ["Product Manager", "product_manager"]].each do |label, value| %>
+        <div class="flex items-center">
+          <%= check_box_tag "question[roles][]", value, Array(question.roles).include?(value),
+                            id: "role_#{value}",
+                            class: "h-4 w-4 text-indigo-600 border-gray-300 rounded" %>
+          <label for="role_#{value}" class="ml-2 block text-sm text-gray-700">
+            <%= label %>
+          </label>
+        </div>
+      <% end %>
+    </div>
+
+    <p class="mt-2 text-sm text-gray-500">
+      If no roles are selected, the question will apply to all.
+    </p>
+  </div>
+
   <div class="flex items-start">
     <div class="flex items-center h-5">
       <%= form.check_box :required, class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" %>

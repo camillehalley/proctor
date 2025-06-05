@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
-
 const TextQuestion = ({ question, onChange }) => {
   return (
     <div className="mt-1">
@@ -101,6 +100,10 @@ const TakeSurvey = (props) => {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState([]);
   const [submitted, setSubmitted] = useState(false);
+  const [role, setRole] = useState('engineer');
+
+  // if no rows are specified, apply to all roles
+  const filteredQuestions = questions.filter(q => q.roles.length === 0 || q.roles.includes(role));
 
   const handleInputChange = (questionId, value) => {
     setResponses({
@@ -115,9 +118,9 @@ const TakeSurvey = (props) => {
     setErrors([]);
 
     // Validate responses
-    const requiredQuestions = questions.filter(q => q.required);
+    const requiredQuestions = filteredQuestions.filter(q => q.required);
     const missingResponses = requiredQuestions.filter(q => !responses[q.id]);
-    
+
     if (missingResponses.length > 0) {
       setErrors(['Please answer all required questions.']);
       setSubmitting(false);
@@ -142,6 +145,7 @@ const TakeSurvey = (props) => {
         body: JSON.stringify({
           response: {
             survey_id: survey.id,
+            submission: {role: role},
             question_responses_attributes: formattedResponses
           }
         })
@@ -341,9 +345,6 @@ const TakeSurvey = (props) => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">{survey.title}</h1>
-      <p className="mb-6">{survey.description}</p>
-      
       {errors.length > 0 && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
           <div className="flex">
@@ -364,7 +365,27 @@ const TakeSurvey = (props) => {
       )}
       
       <form onSubmit={handleSubmit}>
-        {questions.map(question => (
+        <div className="mb-6 p-4 bg-white shadow rounded">
+          <div className="mb-4">
+            <label htmlFor="role" className="block text-gray-700 text-sm font-bold mb-2">
+              Select your role <span className="text-red-500">*</span>
+            </label>
+            <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="shadow border rounded w-full py-1 px-3 text-sm text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-white"
+                required
+            >
+              <option value="" disabled>Select a role</option>
+              <option value="engineer">Engineer</option>
+              <option value="designer">Designer</option>
+              <option value="product_manager">Product Manager</option>
+            </select>
+          </div>
+
+        </div>
+        {filteredQuestions.map(question => (
           <div key={question.id} className="mb-6 p-4 bg-white shadow rounded">
             {renderQuestion(question)}
           </div>
